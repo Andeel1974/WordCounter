@@ -1,2 +1,2 @@
-# WorderCounter
+# WordCounter
 Word Counter program
