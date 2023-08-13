@@ -18,9 +18,23 @@ Note, do the above before importing the project into your workspace.
 
 
 
+Instructions for testing:
+=========================
+
+Run the JUnits. They are stand-alone - they do not require any setup.
+
+This service API cannot be run from an external tool such as Postman or SoapUI because there is no implementation for com.companyname.projectname.wordcounter.service.TranslatorService
+This is deliberate as per the scope of the requirements listed further below.
+Refer to the TODOs on com.companyname.projectname.wordcounter.service.TranslatorService for further information.
+
+
 
 Instructions for use:
 =====================
+
+ - For information on the Service API in the absense of any OpenAPI/Swagger documentation, refer to the implementation for the 
+ com.companyname.projectname.wordcounter.controllers.WordServiceController & 
+ com.companyname.projectname.wordcounter.exception.GlobalExceptionHandler classes.
 
  - In order to avoid an OutOfMemoryError (given the current implementation) run this as a service that is restarted regularly.
  
