@@ -16,26 +16,47 @@ import com.companyname.projectname.wordcounter.exception.EmptyWordListException;
 @Service
 public class WordCounterServiceImpl implements WordCounterService {
 	
-	// TODO - If the words and their counts were to be stored in a database instead then the RDBMS in conjunction 
-	// with an application-tier @Transactional annotation (with the necessary 'isolation' level set as an attribute) 
-	// on this class would provide the necessary multi-user environment protection instead
-	// TODO - Functionality will need to be developed to housekeep this data-structure or else a Memory Leak will ensue
-	// Choice of 'static', 'ConcurrentMap' & 'AtomicLong' are to keep a consistent & minimal state in a multi-user environment where 
-	// each request must work with the same 'wordStore' instance. Refer to comments further above regarding refactoring 
+	private static final String EMPTY_SPACE = " ";
+	private static final String TRANSLATED_INTO = "translated into";
+	private static final String COUNT_INCREMENTED = "count incremented in word store";
+	private static final String ADDED_TO_WORD_STORE = "added to word store";
+	private static final String NOT_TRANSLATED = "not translated";
+	private static final String NOT_ADDED_TO_WORD_STORE = "not added to word store";
+	private static final String NO_WORD_COUNT = "No word count found for : ";
+	private static final String WORD_COUNT = "Word count for : ";
+	private static final String NULL_EMPTY_WORD = "countWord invoked for null or empty word";
+	private static final String WORD_STORE_CLEARED = "word store cleared";
+
+	// TODO - If the words and their counts were to be stored in a database instead then 
+		// the RDBMS in conjunction with an application-tier @Transactional annotation 
+		// (with the necessary 'isolation' level set as an attribute) then that together 
+		// with a DAO (e.g. implementing a typed Spring JpaRepository interface) would 
+		// preferably provide the necessary multi-user environment protection instead.
+	// TODO - Functionality will need to be specified & developed to housekeep this 
+		// data-structure or else a Memory Leak will ensue.
+		// This is outside of the scope of the stated requirements but nonetheless 
+		// a public clearWordStore() method is provided
+	// Choice of 'static', 'ConcurrentMap' & 'AtomicLong' are to keep a consistent & minimal 
+	// state in a multi-user environment where each request must work with the same 
+	// 'wordStore' instance. Refer to comments further above regarding refactoring 
 	// this solution to use a RDBMS instead.
 	private static ConcurrentMap<String, AtomicLong> wordStore = new ConcurrentHashMap<>();
 	
-	@Autowired
-	TranslatorService translatorService;
+	private static Supplier<EmptyWordListException> exceptionHandler = () -> {
+		throw new EmptyWordListException(EMPTYWORDLIST_MESSAGE);
+	};
 	
-	Logger logger = LoggerFactory.getLogger(WordCounterServiceImpl.class);
+	@Autowired
+	private TranslatorService translatorService;
+	
+	private final Logger logger = LoggerFactory.getLogger(WordCounterServiceImpl.class);
 
 	@Override
 	public List<String> addWords(List<String> words) throws EmptyWordListException {
 		
 		if (this.isNullOrEmptyList(words)) {
-			logger.error("EmptyWordListException");
-			throw new EmptyWordListException();
+			logger.error(EMPTYWORDLIST_MESSAGE);
+			exceptionHandler.get();
 		}
 		
 		List<String> translatedWords = new ArrayList<>();
@@ -51,21 +72,25 @@ public class WordCounterServiceImpl implements WordCounterService {
 						
 						StringBuilder tranlatedWordMessage = new StringBuilder();
 						tranlatedWordMessage.append(currentWord);
-						tranlatedWordMessage.append(" translated into ");
+						tranlatedWordMessage.append(EMPTY_SPACE);
+						tranlatedWordMessage.append(TRANSLATED_INTO);
+						tranlatedWordMessage.append(EMPTY_SPACE);
 						tranlatedWordMessage.append(translatedWord);
 						logger.info(tranlatedWordMessage.toString());
 						
 						if (wordStore.computeIfPresent(translatedWord, (key, val) -> {
 								StringBuilder wordCountIncrementMessage = new StringBuilder();
 								wordCountIncrementMessage.append(key);
-								wordCountIncrementMessage.append(" count incremented in word store");
+								wordCountIncrementMessage.append(EMPTY_SPACE);
+								wordCountIncrementMessage.append(COUNT_INCREMENTED);
 								logger.info(wordCountIncrementMessage.toString());
 								return new AtomicLong(val.incrementAndGet());
 							}) == null) {
 								wordStore.computeIfAbsent(translatedWord, (key) -> {
 									StringBuilder wordCountAdditionMessage = new StringBuilder();
 									wordCountAdditionMessage.append(key);
-									wordCountAdditionMessage.append(" added to word store");
+									wordCountAdditionMessage.append(EMPTY_SPACE);
+									wordCountAdditionMessage.append(ADDED_TO_WORD_STORE);
 									logger.info(wordCountAdditionMessage.toString());
 									return new AtomicLong(1);
 								});
@@ -74,17 +99,19 @@ public class WordCounterServiceImpl implements WordCounterService {
 					} else {
 						StringBuilder nonTranslatedWordMessage = new StringBuilder();
 						nonTranslatedWordMessage.append(currentWord);
-						nonTranslatedWordMessage.append(" not translated");
+						nonTranslatedWordMessage.append(EMPTY_SPACE);
+						nonTranslatedWordMessage.append(NOT_TRANSLATED);
 						logger.info(nonTranslatedWordMessage.toString());
 					}
 				}
 			}
-			// Assumption - Requirements do not state what to do in case of null or empty List of words, 
+			// Assumption - Requirements do not state what to do in case of 
 			//              an empty word, non-valid word or unrecognised word.
 			// 			  - Here we assume an empty word should result in an empty translation.
 			StringBuilder nonWordCountMessage = new StringBuilder();
 			nonWordCountMessage.append(currentWord);
-			nonWordCountMessage.append(" not added to wordcount");
+			nonWordCountMessage.append(EMPTY_SPACE);
+			nonWordCountMessage.append(NOT_ADDED_TO_WORD_STORE);
 			logger.info(nonWordCountMessage.toString());
 			
 			translatedWords.add("");
@@ -101,13 +128,13 @@ public class WordCounterServiceImpl implements WordCounterService {
 		if ((word != null) && (word.length() > 0)) {
 			AtomicLong wordCount = wordStore.get(word.trim().toLowerCase());
 			if (wordCount == null) {
-				wordCountMessage.append("No word count found for : ");
+				wordCountMessage.append(NO_WORD_COUNT);
 				wordCountMessage.append(word);
 				logger.info(wordCountMessage.toString());
 				return 0l;
 			}
 			
-			wordCountMessage.append("Word count for : ");
+			wordCountMessage.append(WORD_COUNT);
 			wordCountMessage.append(word);
 			wordCountMessage.append(" = ");
 			wordCountMessage.append(word);
@@ -115,7 +142,7 @@ public class WordCounterServiceImpl implements WordCounterService {
 			
 			return wordCount.longValue();
 		} else {
-			logger.info("countWord invoked for null or empty word");
+			logger.info(NULL_EMPTY_WORD);
 			return 0l;
 		}
 	}
@@ -124,20 +151,18 @@ public class WordCounterServiceImpl implements WordCounterService {
 	public void clearWordStore() {
 		// Provided for internal housekeeping purposes.
 		wordStore.clear();
-		logger.info("word store cleared");
+		logger.info(WORD_STORE_CLEARED);
 	}
 	
 	private boolean isNullOrEmptyList(List<String> words) {
-		return (words == null || words.size() < 1) ? true : false;
+		return (words == null || words.isEmpty()) ? true : false;
 	}
 	
 	private boolean isNullOrEmptyWord(String word) {
-		// TODO can use a third party library for this check instead
-		return (word == null || word.isEmpty() || word.trim().isEmpty()) ? true : false;
+		return (StringUtils.isBlank(word)) ? true : false;
 	}
 	
 	private boolean validateWord(String word) {
-		// TODO can use a third party library for this check instead
 		char[] charArr = word.toCharArray();
 		for(char c : charArr) {
 	        if(!Character.isLetter(c)) {
