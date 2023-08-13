@@ -6,10 +6,7 @@ package com.companyname.projectname.wordcounter.exception;
 public class EmptyWordListException extends RuntimeException {
 
 	private static final long serialVersionUID = -378195800212592619L;
-
-	public EmptyWordListException() {
-	}
-
+	
 	public EmptyWordListException(String message) {
 		super(message);
 	}
