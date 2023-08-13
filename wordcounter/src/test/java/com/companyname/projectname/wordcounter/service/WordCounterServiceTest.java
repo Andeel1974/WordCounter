@@ -20,7 +20,6 @@ import com.companyname.projectname.wordcounter.exception.EmptyWordListException;
 
 @ExtendWith(MockitoExtension.class)
 public class WordCounterServiceTest {
-	
 	@Mock
 	TranslatorService transltorServivce;
 	
@@ -31,7 +30,7 @@ public class WordCounterServiceTest {
 	void setup() {
 		service.clearWordStore();
 	}
-	
+
 	@Test
 	void shouldAddOneWord() {
 		
@@ -49,7 +48,7 @@ public class WordCounterServiceTest {
 		
 		assertEquals(1l, service.countWord(firstWordTranslated.toLowerCase()));
 	}
-	
+
 	@Test
 	void shouldAddMultipleWords() {
 		
@@ -81,7 +80,7 @@ public class WordCounterServiceTest {
 		assertEquals(1l, service.countWord(secondWordTranslated.toLowerCase()));
 		assertEquals(1l, service.countWord(thirdWordTranslated.toLowerCase()));
 	}
-	
+
 	@Test
 	void addWords_shouldAddMultipleWordsWithBlankEntry() {
 		
@@ -108,14 +107,14 @@ public class WordCounterServiceTest {
 		assertEquals(secondWordTranslated, addedWords.get(1));
 		assertEquals(thirdWordTranslated.toLowerCase(), addedWords.get(2));
 	}
-	
+
 	@Test
 	void addWords_shouldNotAddEmptyWordsList() {
 		List<String> wordsEmpty = new ArrayList<String>();
 		assertThrows(EmptyWordListException.class, () -> service.addWords(wordsEmpty));
 		assertThrows(EmptyWordListException.class, () -> service.addWords(null));
 	}
-	
+
 	@Test
 	void nonAlphabeticCharacters() {
 		
@@ -144,7 +143,7 @@ public class WordCounterServiceTest {
 		
 		assertEquals(0l, service.countWord(secondWordTranslated.toLowerCase()));
 	}
-	
+
 	@Test
 	void addWords_nonTranslatedWord() {
 		
@@ -172,13 +171,13 @@ public class WordCounterServiceTest {
 		assertEquals(secondWordTranslated, addedWords.get(1));
 		assertEquals(thirdWordTranslated.toLowerCase(), addedWords.get(2));
 	}
-	
+
 	@Test
 	void countWord_emptyWord() {
 		assertEquals(0l, service.countWord(null));
 		assertEquals(0l, service.countWord(" "));
 	}
-	
+
 	@Test
 	void countWord_nonExistentWord() {
 		
@@ -194,7 +193,7 @@ public class WordCounterServiceTest {
 		
 		assertEquals(0l, service.countWord("nonExistentWord"));
 	}
-	
+
 	@Test
 	void countWord_multipleSameEntries() {
 		
