@@ -19,16 +19,11 @@ import com.companyname.projectname.wordcounter.service.WordCounterService;
 @RestController
 public class WordServiceController {
 	
-	// Note, this design does not throw any Exceptions.
-	// If it were to throw Exceptions then an 'ExceptionHandler' annotated with 
-	// @RestControllerAdvice and with individual methods each annotated with 
-	// @ExceptionHandler would be required
-	
 	public static final String WORD_COUNT_URL = "/wordcounter/{word}";
 	public static final String WORD_ADD_URL = "/wordcounter/";
 	
 	@Autowired
-	WordCounterService wordCounterService;
+	private WordCounterService wordCounterService;
 
 	@GetMapping(WordServiceController.WORD_COUNT_URL)
 	public ResponseEntity<Long> countWord(@PathVariable String word) {
@@ -41,6 +36,6 @@ public class WordServiceController {
 	@PostMapping(WordServiceController.WORD_ADD_URL)
 	public ResponseEntity<List<String>> addWords(@RequestBody List<String> words) {
 		List<String> translatedWords = wordCounterService.addWords(words);
-		return new ResponseEntity<>(translatedWords, HttpStatus.OK);
+		return new ResponseEntity<>(translatedWords, HttpStatus.CREATED);
 	}
 }
