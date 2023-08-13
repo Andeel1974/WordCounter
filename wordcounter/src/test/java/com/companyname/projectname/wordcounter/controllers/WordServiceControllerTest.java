@@ -86,7 +86,7 @@ public class WordServiceControllerTest {
 			    new ParameterizedTypeReference<List<String>>() {}
 			  );
 		
-		assertThat(response1.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(response1.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 		assertTrue(response1.getBody().size() == 1);
 		assertThat(response1.getBody().get(0).equals(translatedWord));
 		
@@ -120,5 +120,6 @@ public class WordServiceControllerTest {
 		
 		assertThat(response1.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
 		assertTrue(response1.getBody().getMessageCode().equals(GlobalExceptionHandler.EMPTY_WORD_LIST_MESSAGE_CODE));
+		assertTrue(response1.getBody().getMessage().equals(WordCounterService.EMPTYWORDLIST_MESSAGE));
 	}
 }
