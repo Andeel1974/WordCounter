@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 
+import com.companyname.projectname.wordcounter.service.WordCounterService;
+
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 	
